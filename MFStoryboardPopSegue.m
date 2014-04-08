@@ -14,7 +14,18 @@
 - (void)perform {
     UIViewController *sourceViewController = [self sourceViewController];
     UIViewController *destinationViewController = [self destinationViewController];
-    UIView *sourceSnapshot = [[sourceViewController view] snapshotViewAfterScreenUpdates:YES];
+
+    UIView *sourceSnapshot;
+    if ([sourceViewController.view respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)]) {
+        sourceSnapshot = [sourceViewController.view snapshotViewAfterScreenUpdates:YES];
+    } else {
+        UIGraphicsBeginImageContextWithOptions(sourceViewController.view.bounds.size, NO, 0.0f);
+        [sourceViewController.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+        UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        sourceSnapshot = [[UIImageView alloc] initWithImage:screenshot];
+        sourceSnapshot.frame = sourceViewController.view.frame;
+    }
 
     [sourceViewController dismissViewControllerAnimated:NO completion:nil];
 
@@ -24,14 +35,17 @@
 
     CGRect destinationFrame = [destinationView frame];
     CGRect snapshotFrame = [sourceSnapshot frame];
-    [destinationView setFrame:CGRectMake(- roundf(destinationFrame.size.width / 3), 0, destinationFrame.size.width, destinationFrame.size.height)];
+
+    destinationFrame.origin.x = - roundf(destinationFrame.size.width / 3);
+    destinationView.frame = destinationFrame;
+    destinationFrame.origin.x = 0.0f;
 
     [[sourceSnapshot layer] setShadowColor:[UIColor grayColor].CGColor];
     [[sourceSnapshot layer] setShadowOffset:CGSizeMake(-5, 0)];
     [[sourceSnapshot layer] setShadowOpacity:0.2f];
 
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        [sourceSnapshot setFrame:CGRectMake(snapshotFrame.size.width, 0, snapshotFrame.size.width, snapshotFrame.size.height)];
+        [sourceSnapshot setFrame:CGRectMake(snapshotFrame.size.width, snapshotFrame.origin.y, snapshotFrame.size.width, snapshotFrame.size.height)];
         [destinationView setFrame:destinationFrame];
     } completion:^(BOOL finished) {
         [sourceSnapshot removeFromSuperview];
