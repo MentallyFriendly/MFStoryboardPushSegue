@@ -3,7 +3,7 @@
 //  Mentally Friendly
 //
 //  Created by Kyle Fuller on 14/10/2013.
-//  Copyright (c) 2013 Mentally Friendly. All rights reserved.
+//  Copyright (c) 2013-2014 Mentally Friendly. All rights reserved.
 //
 
 #import "MFStoryboardPushSegue.h"
@@ -27,28 +27,28 @@
         sourceSnapshot.frame = sourceViewController.view.frame;
     }
 
-    [sourceViewController presentViewController:destinationViewController animated:NO completion:nil];
+    [sourceViewController presentViewController:destinationViewController animated:NO completion:^{
+        UIView *destinationView = [destinationViewController view];
+        UIView *superView = [destinationView superview];
+        [superView insertSubview:sourceSnapshot belowSubview:destinationView];
 
-    UIView *destinationView = [destinationViewController view];
-    UIView *superView = [destinationView superview];
-    [superView insertSubview:sourceSnapshot belowSubview:destinationView];
+        CGRect destinationFrame = [destinationView frame];
+        CGRect snapshotFrame = [sourceSnapshot frame];
 
-    CGRect destinationFrame = [destinationView frame];
-    CGRect snapshotFrame = [sourceSnapshot frame];
+        destinationFrame.origin.x = destinationFrame.size.width;
+        destinationView.frame = destinationFrame;
+        destinationFrame.origin.x = 0.0f;
 
-    destinationFrame.origin.x = destinationFrame.size.width;
-    destinationView.frame = destinationFrame;
-    destinationFrame.origin.x = 0.0f;
+        destinationView.layer.shadowColor = [UIColor grayColor].CGColor;
+        destinationView.layer.shadowOffset = CGSizeMake(-5, 0);
+        destinationView.layer.shadowOpacity = 0.2f;
 
-    [[destinationView layer] setShadowColor:[UIColor grayColor].CGColor];
-    [[destinationView layer] setShadowOffset:CGSizeMake(-5, 0)];
-    [[destinationView layer] setShadowOpacity:0.2f];
-
-    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        [sourceSnapshot setFrame:CGRectMake(- roundf(snapshotFrame.size.width / 3), sourceViewController.view.frame.origin.y, snapshotFrame.size.width, snapshotFrame.size.height)];
-        [destinationView setFrame:destinationFrame];
-    } completion:^(BOOL finished) {
-        [sourceSnapshot removeFromSuperview];
+        [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            [sourceSnapshot setFrame:CGRectMake(- roundf(snapshotFrame.size.width / 3), sourceViewController.view.frame.origin.y, snapshotFrame.size.width, snapshotFrame.size.height)];
+            [destinationView setFrame:destinationFrame];
+        } completion:^(BOOL finished) {
+            [sourceSnapshot removeFromSuperview];
+        }];
     }];
 }
 
