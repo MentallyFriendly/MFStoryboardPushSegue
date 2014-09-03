@@ -42,6 +42,7 @@
         sourceSnapshot.layer.shadowColor = [UIColor grayColor].CGColor;
         sourceSnapshot.layer.shadowOffset = CGSizeMake(-5, 0);
         sourceSnapshot.layer.shadowOpacity = 0.2f;
+        sourceSnapshot.layer.shadowPath = [[UIBezierPath bezierPathWithRect:sourceSnapshot.bounds] CGPath];
 
         [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             [sourceSnapshot setFrame:CGRectMake(snapshotFrame.size.width, snapshotFrame.origin.y, snapshotFrame.size.width, snapshotFrame.size.height)];
